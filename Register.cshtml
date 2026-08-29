@@ -1,0 +1,237 @@
+﻿@model EduCompSN_Clean.Models.RegisterViewModel
+@{
+    Layout = null;
+    ViewBag.Title = "Register";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduCompSN - Create Account</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <style>
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+        }
+
+        .register-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 35px rgba(0,0,0,0.1);
+            padding: 2rem;
+            width: 100%;
+            max-width: 500px;
+            transition: transform 0.3s;
+        }
+
+            .register-card:hover {
+                transform: translateY(-5px);
+            }
+
+        .brand-icon {
+            font-size: 3rem;
+            color: #b19cd9;
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #6c757d;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .input-group-text {
+            background-color: #f8f9fa;
+            border-right: none;
+        }
+
+        .form-control {
+            border-left: none;
+        }
+
+            .form-control:focus {
+                box-shadow: none;
+                border-color: #b19cd9;
+            }
+
+        .btn-register {
+            background-color: #b19cd9;
+            border: none;
+            padding: 10px;
+            font-weight: 600;
+            border-radius: 30px;
+            width: 100%;
+            transition: background 0.3s;
+        }
+
+            .btn-register:hover {
+                background-color: #9b7bcb;
+            }
+
+        .login-link {
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+            .login-link a {
+                color: #b19cd9;
+                text-decoration: none;
+                font-weight: 500;
+            }
+
+                .login-link a:hover {
+                    text-decoration: underline;
+                }
+
+        hr {
+            margin: 1.5rem 0;
+        }
+
+        .footer-note {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #adb5bd;
+            margin-top: 1.5rem;
+        }
+
+        .extra-fields {
+            transition: all 0.3s ease;
+        }
+
+        select.form-control {
+            border-left: 1px solid #ced4da;
+        }
+
+        .input-group select.form-control {
+            border-left: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="register-card">
+        <div class="brand-icon">
+            <i class="fas fa-user-plus"></i>
+        </div>
+        <h2 class="text-center">Create Account</h2>
+        <p class="subtitle">Join EduCompSN community</p>
+
+        @using (Html.BeginForm("Register", "Account", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+
+            <div class="form-group">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-user"></i></span>
+                    @Html.TextBoxFor(m => m.FullName, new { @class = "form-control", placeholder = "Full Name" })
+                </div>
+                @Html.ValidationMessageFor(m => m.FullName, "", new { @class = "text-danger small" })
+            </div>
+
+            <div class="form-group">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                    @Html.TextBoxFor(m => m.Email, new { @class = "form-control", placeholder = "Email address" })
+                </div>
+                @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger small" })
+            </div>
+
+            <div class="form-group">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                    @Html.PasswordFor(m => m.Password, new { @class = "form-control", placeholder = "Password" })
+                </div>
+                @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger small" })
+            </div>
+
+            <div class="form-group">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-tag"></i></span>
+                    @Html.DropDownListFor(m => m.Role,
+                        new SelectList(new[] { "Student", "Company", "University" }),
+                        "Select your role",
+                        new { @class = "form-control", id = "Role" })
+                </div>
+                @Html.ValidationMessageFor(m => m.Role, "", new { @class = "text-danger small" })
+            </div>
+
+            <!-- حقل الجامعة (يظهر عند اختيار University) -->
+            <div id="universityField" class="extra-fields form-group" style="display:none;">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-university"></i></span>
+                    @Html.DropDownListFor(m => m.UniversityName,
+                        new SelectList(new[] {
+                            "University of Jordan", "Jordan University of Science and Technology",
+                            "Yarmouk University", "Balqa Applied University", "Al-Zaytoonah University",
+                            "Princess Sumaya University", "Jadara University", "Philadelphia University",
+                            "Amman Arab University", "Middle East University", "German Jordanian University"
+                        }), "Select your university",
+                        new { @class = "form-control" })
+                </div>
+                @Html.ValidationMessageFor(m => m.UniversityName, "", new { @class = "text-danger small" })
+            </div>
+
+            <!-- حقل اسم الشركة (يظهر عند اختيار Company) -->
+            <div id="companyField" class="extra-fields form-group" style="display:none;">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-building"></i></span>
+                    @Html.TextBoxFor(m => m.CompanyName, new { @class = "form-control", placeholder = "Company name" })
+                </div>
+                @Html.ValidationMessageFor(m => m.CompanyName, "", new { @class = "text-danger small" })
+            </div>
+
+            <button type="submit" class="btn btn-register btn-primary">Register</button>
+        }
+
+        <hr />
+        <div class="login-link">
+            Already have an account? <a href="@Url.Action("Login", "Account")">Sign in</a>
+        </div>
+        <div class="footer-note">
+            <i class="fas fa-shield-alt"></i> Secure registration | EduCompSN
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            function toggleExtraFields() {
+                var role = $('#Role').val();
+                if (role === 'University') {
+                    $('#universityField').show();
+                    $('#companyField').hide();
+                } else if (role === 'Company') {
+                    $('#universityField').hide();
+                    $('#companyField').show();
+                } else {
+                    $('#universityField').hide();
+                    $('#companyField').hide();
+                }
+            }
+
+            $('#Role').change(toggleExtraFields);
+            toggleExtraFields(); // على التحميل
+        });
+    </script>
+</body>
+</html>
