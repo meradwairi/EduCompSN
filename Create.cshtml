@@ -1,0 +1,120 @@
+﻿@model EduCompSN_Clean.Models.Post
+
+@{
+    ViewBag.Title = "Create Post";
+}
+
+<style>
+    .create-post-card {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+        transition: transform 0.2s;
+    }
+
+        .create-post-card:hover {
+            transform: translateY(-2px);
+        }
+
+    .btn-publish {
+        background-color: #b19cd9;
+        border: none;
+        padding: 10px 24px;
+        border-radius: 40px;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+        .btn-publish:hover {
+            background-color: #9b7bcb;
+            transform: scale(1.02);
+        }
+
+    .form-control:focus {
+        border-color: #b19cd9;
+        box-shadow: 0 0 0 0.2rem rgba(177,156,217,0.25);
+    }
+
+    .card-header {
+        background-color: transparent;
+        border-bottom: 1px solid #e9ecef;
+        padding: 1rem 1.5rem;
+    }
+
+    .avatar-circle {
+        width: 48px;
+        height: 48px;
+        background-color: #b19cd9;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 1.2rem;
+        margin-right: 12px;
+    }
+</style>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-7">
+            <div class="card create-post-card">
+                <div class="card-header bg-white">
+                    <div class="d-flex align-items-center">
+                        <div class="avatar-circle">
+                            @(Session["UserFullName"] != null ? Session["UserFullName"].ToString().Substring(0,1).ToUpper() : "?")
+                        </div>
+                        <h5 class="mb-0 fw-semibold">Create a New Post</h5>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @using (Html.BeginForm("Create", "Posts", FormMethod.Post, new { enctype = "multipart/form-data", @class = "needs-validation" }))
+                    {
+                        @Html.AntiForgeryToken()
+
+                        <div class="mb-3">
+                            @Html.LabelFor(m => m.Content, new { @class = "form-label fw-semibold" })
+                            @Html.TextAreaFor(m => m.Content, new { @class = "form-control", rows = 5, placeholder = "What's on your mind? Share with the community..." })
+                            @Html.ValidationMessageFor(m => m.Content, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Upload Image (optional)</label>
+                            <input type="file" name="image" class="form-control" accept="image/*" />
+                            <div class="form-text text-muted">You can upload JPG, PNG, or GIF. Max size is not enforced in demo.</div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="/Posts/Index" class="btn btn-outline-secondary rounded-pill px-4">Cancel</a>
+                            <button type="submit" class="btn btn-publish text-white rounded-pill px-5">
+                                <i class="fas fa-paper-plane me-2"></i> Publish
+                            </button>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Bootstrap 5 validation (optional, but adds interactivity)
+        (function() {
+            'use strict';
+            window.addEventListener('load', function() {
+                var forms = document.getElementsByClassName('needs-validation');
+                Array.prototype.filter.call(forms, function(form) {
+                    form.addEventListener('submit', function(event) {
+                        if (form.checkValidity() === false) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            }, false);
+        })();
+    </script>
+}

@@ -1,0 +1,338 @@
+﻿@model EduCompSN_Clean.Models.User
+@using EduCompSN_Clean.Models
+@{
+    ViewBag.Title = "Profile";
+    var userPosts = ViewBag.UserPosts as List<Post>;
+    var experiences = ViewBag.Experiences as List<Experience>;
+    var educations = ViewBag.Educations as List<Education>;
+    var skills = ViewBag.Skills as List<Skill>;
+    var documents = ViewBag.Documents as List<Document>;
+    var isFollowing = ViewBag.IsFollowing as bool?;
+    var isOwner = ViewBag.IsOwner ?? false;
+}
+
+<div class="container">
+    <div class="row">
+        <!-- العمود الأيسر: معلومات شخصية وإحصائيات -->
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body text-center">
+                    @if (!string.IsNullOrEmpty(Model.ProfilePicture))
+                    {
+                        <img src="@Model.ProfilePicture" class="rounded-circle img-fluid" style="width: 150px; height: 150px; object-fit: cover;" />
+                    }
+                    else
+                    {
+                        <div class="avatar-circle mx-auto mb-3" style="width: 100px; height: 100px; font-size: 2.5rem;">
+                            @Model.FullName.Substring(0, 1).ToUpper()
+                        </div>
+                    }
+                    <h4>@Model.FullName</h4>
+                    <p class="text-muted">@Model.Email</p>
+                    <p><strong>Role:</strong> @Model.Role</p>
+                    @if (Model.Role == "University" && !string.IsNullOrEmpty(Model.UniversityName))
+                    {
+                        <p><strong>University:</strong> @Model.UniversityName</p>
+                    }
+                    else if (Model.Role == "Company" && !string.IsNullOrEmpty(Model.CompanyName))
+                    {
+                        <p><strong>Company:</strong> @Model.CompanyName</p>
+                    }
+                    @if (Model.IsAdmin)
+                    {
+                        <span class="badge bg-danger">Admin</span>
+                    }
+                    <p><strong>Bio:</strong> @(string.IsNullOrEmpty(Model.Bio) ? "No bio added." : Model.Bio)</p>
+
+                    @if (!isOwner)
+                    {
+                        <div class="mt-3">
+                            <button id="followBtn" data-userid="@Model.Id" class="btn @(isFollowing == true ? "btn-secondary" : "btn-primary")">
+                                @(isFollowing == true ? "Unfollow" : "Follow")
+                            </button>
+                            <a href="@Url.Action("Conversation", "Chat", new { withUserId = Model.Id })" class="btn btn-outline-primary ms-2">
+                                <i class="fas fa-comment-dots"></i> Send Message
+                            </a>
+                        </div>
+                    }
+                    else
+                    {
+                        <a href="@Url.Action("EditProfile")" class="btn btn-outline-primary btn-sm">Edit Profile</a>
+                    }
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-body text-center">
+                    <div class="row">
+                        <div class="col-4">
+                            <h5>@ViewBag.PostsCount</h5>
+                            <small>Posts</small>
+                        </div>
+                        <div class="col-4">
+                            <h5>@ViewBag.FollowersCount</h5>
+                            <small>Followers</small>
+                        </div>
+                        <div class="col-4">
+                            <h5>@ViewBag.FollowingCount</h5>
+                            <small>Following</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- العمود الأوسط: الخبرات والتعليم -->
+        <div class="col-md-4">
+            <!-- الخبرات -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5><i class="fas fa-briefcase"></i> Experience</h5>
+                </div>
+                <div class="card-body">
+                    @if (experiences == null || experiences.Count == 0)
+                    {
+                        <p class="text-muted">No experience added yet.</p>
+                        if (isOwner)
+                        {
+                            <a href="@Url.Action("AddExperience")" class="btn btn-sm btn-outline-primary">+ Add Experience</a>
+                        }
+                    }
+                    else
+                    {
+                        foreach (var exp in experiences)
+                        {
+                            <div class="mb-3">
+                                <strong>@exp.JobTitle</strong> at <strong>@exp.CompanyName</strong><br />
+                                <small class="text-muted">
+                                    @if (exp.StartDate.HasValue)
+                                    {
+                                        @exp.StartDate.Value.ToString("yyyy-MM")
+                                    }
+                                    -
+                                    @(exp.IsCurrent ? "Present" : (exp.EndDate.HasValue ? exp.EndDate.Value.ToString("yyyy-MM") : ""))
+                                </small>
+                                <p class="mt-1">@exp.Description</p>
+                            </div>
+                        }
+                        if (isOwner)
+                        {
+                            <a href="@Url.Action("AddExperience")" class="btn btn-sm btn-outline-primary">+ Add Experience</a>
+                        }
+                    }
+                </div>
+            </div>
+
+            <!-- التعليم -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5><i class="fas fa-graduation-cap"></i> Education</h5>
+                </div>
+                <div class="card-body">
+                    @if (educations == null || educations.Count == 0)
+                    {
+                        <p class="text-muted">No education added yet.</p>
+                        if (isOwner)
+                        {
+                            <a href="@Url.Action("AddEducation")" class="btn btn-sm btn-outline-primary">+ Add Education</a>
+                        }
+                    }
+                    else
+                    {
+                        foreach (var edu in educations)
+                        {
+                            <div class="mb-3">
+                                <strong>@edu.Degree</strong> in <strong>@edu.FieldOfStudy</strong><br />
+                                <strong>@edu.Institution</strong><br />
+                                <small class="text-muted">
+                                    @if (edu.StartDate.HasValue)
+                                    {
+                                        @edu.StartDate.Value.ToString("yyyy")
+                                    }
+                                    -
+                                    @(edu.EndDate.HasValue ? edu.EndDate.Value.ToString("yyyy") : "Present")
+                                </small>
+                                @if (!string.IsNullOrEmpty(edu.Grade))
+                                {
+                                    <br /><small>Grade: @edu.Grade</small>
+                                }
+                            </div>
+                        }
+                        if (isOwner)
+                        {
+                            <a href="@Url.Action("AddEducation")" class="btn btn-sm btn-outline-primary">+ Add Education</a>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- العمود الأيمن: المنشورات والمهارات والمستندات -->
+        <div class="col-md-4">
+            <!-- المنشورات -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5><i class="fas fa-newspaper"></i> Posts</h5>
+                </div>
+                <div class="card-body">
+                    @if (userPosts == null || userPosts.Count == 0)
+                    {
+                        <p>No posts yet.</p>
+                        if (isOwner)
+                        {
+                            <a href="/Posts/Create" class="btn btn-primary">Create your first post</a>
+                        }
+                    }
+                    else
+                    {
+                        foreach (var post in userPosts)
+                        {
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <p>@post.Content</p>
+                                    @if (!string.IsNullOrEmpty(post.ImagePath))
+                                    {
+                                        <img src="@post.ImagePath" class="img-fluid mb-2" style="max-height: 150px;" />
+                                    }
+                                    <small class="text-muted">@post.CreatedAt.ToString("yyyy-MM-dd HH:mm")</small>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+
+            <!-- المهارات (للطلاب فقط – يمكن إضافتها حسب الرغبة) -->
+            @if (Model.Role == "Student")
+            {
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white">
+                        <h5><i class="fas fa-tags"></i> Skills</h5>
+                    </div>
+                    <div class="card-body">
+                        @if (skills == null || skills.Count == 0)
+                        {
+                            <p class="text-muted">No skills added yet.</p>
+                            if (isOwner)
+                            {
+                                <a href="@Url.Action("AddSkill")" class="btn btn-sm btn-outline-primary">+ Add Skill</a>
+                            }
+                        }
+                        else
+                        {
+                            <div class="d-flex flex-wrap gap-2">
+                                @foreach (var skill in skills)
+                                {
+                                    <span class="badge bg-light text-dark p-2 rounded-pill">
+                                        @skill.SkillName
+                                        @if (skill.Proficiency > 0)
+                                        {
+                                            <span> (@skill.Proficiency%)</span>
+                                        }
+                                        @if (isOwner)
+                                        {
+                                            <a href="#" class="delete-skill ms-1 text-danger" data-id="@skill.Id">✖</a>
+                                        }
+                                    </span>
+                                }
+                            </div>
+                            if (isOwner)
+                            {
+                                <a href="@Url.Action("AddSkill")" class="btn btn-sm btn-outline-primary mt-2">+ Add Skill</a>
+                            }
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- المستندات (للطلاب فقط) -->
+            @if (Model.Role == "Student")
+            {
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white">
+                        <h5><i class="fas fa-file-pdf"></i> Documents</h5>
+                    </div>
+                    <div class="card-body">
+                        @if (documents == null || documents.Count == 0)
+                        {
+                            <p class="text-muted">No documents uploaded yet.</p>
+                            if (isOwner)
+                            {
+                                <a href="@Url.Action("UploadDocument")" class="btn btn-sm btn-outline-primary">+ Upload Document</a>
+                            }
+                        }
+                        else
+                        {
+                            <ul class="list-unstyled">
+                                @foreach (var doc in documents)
+                                {
+                                    <li class="mb-2">
+                                        <a href="@Url.Action("DownloadDocument", "Profile", new { id = doc.Id })" target="_blank">@doc.Title</a>
+                                        @if (!string.IsNullOrEmpty(doc.Description))
+                                        {
+                                            <br /><small class="text-muted">@doc.Description</small>
+                                        }
+                                        @if (isOwner)
+                                        {
+                                            <a href="#" class="delete-document text-danger ms-2" data-id="@doc.Id">✖</a>
+                                        }
+                                    </li>
+                                }
+                            </ul>
+                            if (isOwner)
+                            {
+                                <a href="@Url.Action("UploadDocument")" class="btn btn-sm btn-outline-primary mt-2">+ Upload Document</a>
+                            }
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // متابعة / إلغاء متابعة
+            $('#followBtn').click(function() {
+                var btn = $(this);
+                var userId = btn.data('userid');
+                $.post('@Url.Action("ToggleFollow", "Profile")', { followedId: userId }, function(data) {
+                    if (data.success) {
+                        btn.text(data.following ? 'Unfollow' : 'Follow');
+                        btn.toggleClass('btn-primary btn-secondary');
+                        location.reload();
+                    } else {
+                        alert(data.message);
+                    }
+                });
+            });
+
+            // حذف المهارة
+            $('.delete-skill').click(function(e) {
+                e.preventDefault();
+                var skillId = $(this).data('id');
+                if (confirm('Delete this skill?')) {
+                    $.post('@Url.Action("DeleteSkill", "Profile")', { id: skillId }, function(data) {
+                        if (data.success) location.reload();
+                        else alert('Error deleting skill.');
+                    });
+                }
+            });
+
+            // حذف المستند
+            $('.delete-document').click(function(e) {
+                e.preventDefault();
+                var docId = $(this).data('id');
+                if (confirm('Delete this document?')) {
+                    $.post('@Url.Action("DeleteDocument", "Profile")', { id: docId }, function(data) {
+                        if (data.success) location.reload();
+                        else alert('Error deleting document.');
+                    });
+                }
+            });
+        });
+    </script>
+}

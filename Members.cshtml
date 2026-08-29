@@ -1,0 +1,175 @@
+﻿@model IEnumerable<EduCompSN_Clean.Models.User>
+
+@{
+    ViewBag.Title = "Members";
+    int currentUserId = Session["UserId"] != null ? Convert.ToInt32(Session["UserId"]) : 0;
+    string search = ViewBag.Search as string ?? "";
+}
+
+<style>
+    body {
+        background-color: #f3e8ff;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .profile-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 24px;
+    }
+
+    .card {
+        background: white;
+        border-radius: 24px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        padding: 24px;
+        margin-bottom: 24px;
+    }
+
+    .profile-header {
+        display: flex;
+        gap: 24px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .avatar-large {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #9b59b6, #8e44ad);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 32px;
+        font-weight: bold;
+    }
+
+    .btn-primary {
+        background: #8e44ad;
+        color: white;
+        border: none;
+        border-radius: 30px;
+        padding: 6px 16px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 0.9rem;
+        margin-right: 8px;
+    }
+
+        .btn-primary:hover {
+            background: #6c3483;
+        }
+
+    .btn-outline {
+        background: none;
+        border: 1px solid #8e44ad;
+        color: #8e44ad;
+        border-radius: 30px;
+        padding: 5px 15px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 0.9rem;
+    }
+
+        .btn-outline:hover {
+            background: #f3e8ff;
+        }
+
+    h2 {
+        margin-bottom: 20px;
+    }
+
+    .search-bar {
+        margin-bottom: 30px;
+        text-align: center;
+    }
+
+    .search-input {
+        width: 100%;
+        max-width: 500px;
+        padding: 10px 20px;
+        border-radius: 50px;
+        border: 1px solid #ddd;
+        font-size: 1rem;
+        outline: none;
+        transition: 0.2s;
+    }
+
+        .search-input:focus {
+            border-color: #8e44ad;
+            box-shadow: 0 0 5px rgba(142,68,173,0.3);
+        }
+
+    .search-btn {
+        background: #8e44ad;
+        color: white;
+        border: none;
+        border-radius: 50px;
+        padding: 10px 25px;
+        margin-left: 10px;
+        cursor: pointer;
+    }
+
+        .search-btn:hover {
+            background: #6c3483;
+        }
+
+    .no-results {
+        text-align: center;
+        padding: 40px;
+        background: white;
+        border-radius: 24px;
+        color: #6c757d;
+    }
+
+    .buttons-container {
+        margin-top: 12px;
+    }
+</style>
+
+<div class="profile-container">
+    <h2>Members</h2>
+
+    <div class="search-bar">
+        <form method="get" action="@Url.Action("Members", "Members")">
+            <input type="text" name="search" value="@search" class="search-input" placeholder="Search by name or email..." autocomplete="off" />
+            <button type="submit" class="search-btn">🔍 Search</button>
+        </form>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="no-results">
+            <p>⚠️ No members found matching "@search".</p>
+        </div>
+    }
+    else
+    {
+        foreach (var member in Model)
+        {
+            string avatarLetter = !string.IsNullOrEmpty(member.FullName) ? member.FullName.Substring(0, 1).ToUpper() : "?";
+            <div class="card">
+                <div class="profile-header">
+                    <div class="avatar-large">@avatarLetter</div>
+                    <div>
+                        <h4>@member.FullName</h4>
+                        <p><strong>Email:</strong> @member.Email</p>
+                        <p><strong>Role:</strong> @member.Role</p>
+                        <p><strong>Bio:</strong> @(string.IsNullOrEmpty(member.Bio) ? "No bio" : member.Bio)</p>
+                        <div class="buttons-container">
+                            <a href="@Url.Action("Details", "Profile", new { id = member.Id })" class="btn-outline">👤 View Profile</a>
+                            @if (member.Id != currentUserId)
+                            {
+                                <a href="@Url.Action("Index", "Chat", new { withUserId = member.Id })" class="btn-primary">💬 Send Message</a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>

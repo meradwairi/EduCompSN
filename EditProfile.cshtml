@@ -1,0 +1,171 @@
+﻿@model EduCompSN_Clean.Models.User
+
+@{
+    ViewBag.Title = "Edit Profile";
+    string avatarLetter = Model.FullName != null && Model.FullName.Length > 0 ? Model.FullName.Substring(0, 1).ToUpper() : "?";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Edit Profile</title>
+    <style>
+        body {
+            background: #f3e8ff;
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            border-radius: 28px;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #2c3e50;
+            border-bottom: 2px solid #8e44ad;
+            display: inline-block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 10px 15px;
+            border-radius: 30px;
+            border: 1px solid #ddd;
+        }
+
+        textarea {
+            border-radius: 20px;
+        }
+
+        .avatar-preview {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 36px;
+            font-weight: bold;
+        }
+
+        .image-preview img {
+            max-height: 100px;
+            border-radius: 12px;
+            margin-top: 10px;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            margin: 25px 0 15px;
+            border-bottom: 2px solid #8e44ad;
+        }
+
+        button {
+            background: #8e44ad;
+            color: white;
+            border: none;
+            border-radius: 40px;
+            padding: 12px 25px;
+            cursor: pointer;
+        }
+
+        .cancel-btn {
+            background: #95a5a6;
+            margin-left: 10px;
+            display: inline-block;
+            padding: 12px 25px;
+            border-radius: 40px;
+            color: white;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Edit Profile</h2>
+        <hr />
+        <form method="post" action="@Url.Action("EditProfile", "Profile")" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" name="FullName" value="@Model.FullName" required />
+            </div>
+            <div class="form-group">
+                <label>Bio</label>
+                <textarea name="Bio" rows="3">@Model.Bio</textarea>
+            </div>
+            <div class="form-group">
+                <label>Location</label>
+                <input type="text" name="Location" value="@Model.Location" />
+            </div>
+            <div class="form-group">
+                <label>Profile Picture</label>
+                <input type="file" name="profileImage" accept="image/*" />
+                @if (!string.IsNullOrEmpty(Model.ProfilePicture))
+                {
+                    <div class="image-preview"><img src="@Model.ProfilePicture" /></div>
+                }
+                else
+                {
+                    <div class="avatar-preview">@avatarLetter</div>
+                }
+            </div>
+
+            @if (Model.Role == "Company")
+            {
+                <div class="section-title">Company Information</div>
+                <div class="form-group"><label>Company Name</label><input type="text" name="CompanyName" value="@Model.CompanyName" /></div>
+                <div class="form-group"><label>Description</label><textarea name="CompanyDescription">@Model.CompanyDescription</textarea></div>
+                <div class="form-group"><label>Website</label><input type="text" name="CompanyWebsite" value="@Model.CompanyWebsite" /></div>
+                <div class="form-group"><label>Size</label><input type="text" name="CompanySize" value="@Model.CompanySize" /></div>
+                <div class="form-group"><label>Industry</label><input type="text" name="Industry" value="@Model.Industry" /></div>
+                <div class="form-group">
+                    <label>Cover Image</label><input type="file" name="coverImage" accept="image/*" />
+                    @if (!string.IsNullOrEmpty(Model.CompanyCover))
+                    {<div class="image-preview"><img src="@Model.CompanyCover" /></div>}
+                </div>
+            }
+            else if (Model.Role == "University")
+            {
+                <div class="section-title">University Information</div>
+                <div class="form-group"><label>University Name</label><input type="text" name="UniversityName" value="@Model.UniversityName" /></div>
+                <div class="form-group"><label>Description</label><textarea name="UniversityDescription">@Model.UniversityDescription</textarea></div>
+                <div class="form-group"><label>Website</label><input type="text" name="UniversityWebsite" value="@Model.UniversityWebsite" /></div>
+                <div class="form-group"><label>Founded Year</label><input type="number" name="FoundedYear" value="@Model.FoundedYear" /></div>
+                <div class="form-group"><label>Number of Students</label><input type="number" name="NumberOfStudents" value="@Model.NumberOfStudents" /></div>
+                <div class="form-group">
+                    <label>Cover Image</label><input type="file" name="coverImage" accept="image/*" />
+                    @if (!string.IsNullOrEmpty(Model.UniversityCover))
+                    {<div class="image-preview"><img src="@Model.UniversityCover" /></div>}
+                </div>
+            }
+
+            <div>
+                <button type="submit">Save Changes</button>
+                <a href="@Url.Action("Index", "Profile")" class="cancel-btn">Cancel</a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

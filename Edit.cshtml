@@ -1,0 +1,36 @@
+﻿@model EduCompSN_Clean.Models.Post
+
+@{
+    ViewBag.Title = "Edit Post";
+}
+
+<h2>Edit Post</h2>
+
+@using (Html.BeginForm("Edit", "Posts", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.Id)
+    @Html.HiddenFor(m => m.UserId)
+    @Html.HiddenFor(m => m.CreatedAt)
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.Content)
+        @Html.TextAreaFor(m => m.Content, new { @class = "form-control", rows = 5 })
+        @Html.ValidationMessageFor(m => m.Content)
+    </div>
+
+    <div class="form-group mt-2">
+        <label>Update Image (optional)</label>
+        <input type="file" name="image" class="form-control-file" accept="image/*" />
+        @if (!string.IsNullOrEmpty(Model.ImagePath))
+        {
+            <div class="mt-2">
+                <img src="@Model.ImagePath" style="max-height: 100px;" />
+                <small class="text-muted">Current image</small>
+            </div>
+        }
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-3">Save Changes</button>
+    @Html.ActionLink("Cancel", "Index", null, new { @class = "btn btn-secondary mt-3" })
+}

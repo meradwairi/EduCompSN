@@ -1,0 +1,33 @@
+﻿@model EduCompSN_Clean.Models.Document
+
+@{
+    ViewBag.Title = "Upload Document";
+}
+
+<h2>Upload Document (PDF only)</h2>
+
+@using (Html.BeginForm("UploadDocument", "Profile", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.Title)
+        @Html.TextBoxFor(m => m.Title, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.Title, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.Description)
+        @Html.TextAreaFor(m => m.Description, new { @class = "form-control", rows = 3 })
+        @Html.ValidationMessageFor(m => m.Description, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group">
+        <label>PDF File</label>
+        <input type="file" name="pdfFile" class="form-control-file" accept=".pdf" required />
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-2">Upload</button>
+    @Html.ActionLink("Cancel", "Index", null, new { @class = "btn btn-secondary mt-2" })
+}

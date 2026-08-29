@@ -1,0 +1,125 @@
+﻿@model EduCompSN_Clean.Models.User
+@using EduCompSN_Clean.Models
+@{
+    ViewBag.Title = Model.FullName;
+    var posts = ViewBag.UserPosts as List<Post>;
+    var isFollowing = ViewBag.IsFollowing as bool?;
+}
+
+<div class="container">
+    <!-- صورة الغلاف -->
+    <div class="cover-photo" style="background-image: url('@(string.IsNullOrEmpty(Model.UniversityCover) ? "/Content/images/default-cover.jpg" : Model.UniversityCover)'); height: 200px; background-size: cover; background-position: center; border-radius: 8px;"></div>
+
+    <div class="row">
+        <div class="col-md-8 offset-md-2" style="margin-top: -50px;">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            @if (!string.IsNullOrEmpty(Model.ProfilePicture))
+                            {
+                                <img src="@Model.ProfilePicture" class="rounded-circle" style="width: 100px; height: 100px; object-fit: cover; border: 3px solid white;" />
+                            }
+                            else
+                            {
+                                <i class="fas fa-university fa-4x text-primary"></i>
+                            }
+                        </div>
+                        <div class="ms-3 flex-grow-1">
+                            <h2>@Model.FullName</h2>
+                            <p class="text-muted">@Model.Email</p>
+                            <p>@Model.Location</p>
+                            @if (Model.FoundedYear.HasValue)
+                            {
+                                <p>Founded: @Model.FoundedYear.Value</p>
+                            }
+                            @if (Model.NumberOfStudents.HasValue)
+                            {
+                                <p>Students: @Model.NumberOfStudents.Value</p>
+                            }
+                            <div class="d-flex gap-3">
+                                <span><strong>@ViewBag.FollowersCount</strong> followers</span>
+                                <span><strong>@ViewBag.PostsCount</strong> posts</span>
+                            </div>
+                            @if ((int)Session["UserId"] != Model.Id)
+                            {
+                                <div class="mt-2">
+                                    <button id="followBtn" data-userid="@Model.Id" class="btn @(isFollowing == true ? "btn-secondary" : "btn-primary")">
+                                        @(isFollowing == true ? "Unfollow" : "Follow")
+                                    </button>
+                                    <a href="@Url.Action("Conversation", "Chat", new { withUserId = Model.Id })" class="btn btn-outline-primary ms-2">
+                                        <i class="fas fa-comment-dots"></i> Send Message
+                                    </a>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                    <hr />
+
+                    <!-- نظرة عامة (Overview) مع أيقونة تعديل -->
+                    <h6>
+                        Overview
+                        @if ((int)Session["UserId"] == Model.Id)
+                        {
+                            <a href="@Url.Action("EditProfile", "Profile")" style="margin-left: 8px; color: #b19cd9; text-decoration: none;">
+                                <i class="fas fa-pencil-alt"></i>
+                            </a>
+                        }
+                    </h6>
+                    <p>@(string.IsNullOrEmpty(Model.UniversityDescription) ? "No description provided." : Model.UniversityDescription)</p>
+                    @if (!string.IsNullOrEmpty(Model.UniversityWebsite))
+                    {
+                        <p><i class="fas fa-link"></i> <a href="@Model.UniversityWebsite" target="_blank">@Model.UniversityWebsite</a></p>
+                    }
+                </div>
+            </div>
+
+            <!-- منشورات الجامعة -->
+            <div class="card mt-3 shadow-sm">
+                <div class="card-header bg-white">
+                    <h5>University Posts</h5>
+                </div>
+                <div class="card-body">
+                    @if (posts == null || !posts.Any())
+                    {
+                        <p>No posts yet.</p>
+                    }
+                    else
+                    {
+                        foreach (var post in posts)
+                        {
+                            <div class="card mb-3">
+                                <div class-card-body>
+                                    <p>@post.Content</p>
+                                    @if (!string.IsNullOrEmpty(post.ImagePath))
+                                    {
+                                        <img src="@post.ImagePath" class="img-fluid mb-2" style="max-height: 200px;" />
+                                    }
+                                    <small class="text-muted">@post.CreatedAt.ToString("yyyy-MM-dd HH:mm")</small>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $('#followBtn').click(function () {
+            var btn = $(this);
+            var userId = btn.data('userid');
+            $.post('@Url.Action("ToggleFollow", "Profile")', { followedId: userId }, function (data) {
+                if (data.success) {
+                    btn.text(data.following ? 'Unfollow' : 'Follow');
+                    btn.toggleClass('btn-primary btn-secondary');
+                    location.reload();
+                } else {
+                    alert(data.message);
+                }
+            });
+        });
+    </script>
+}

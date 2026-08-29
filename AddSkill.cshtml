@@ -1,0 +1,29 @@
+﻿@model EduCompSN_Clean.Models.Skill
+
+@{
+    ViewBag.Title = "Add Skill";
+}
+
+<h2>Add Skill</h2>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.SkillName)
+        @Html.TextBoxFor(m => m.SkillName, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.SkillName, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.Proficiency)
+        @Html.TextBoxFor(m => m.Proficiency, new { @class = "form-control", type = "number", min = 0, max = 100 })
+        <small class="form-text text-muted">Optional: 0-100%</small>
+        @Html.ValidationMessageFor(m => m.Proficiency, "", new { @class = "text-danger" })
+    </div>
+
+    <button type="submit" class="btn btn-primary">Add Skill</button>
+    @Html.ActionLink("Cancel", "Index", null, new { @class = "btn btn-secondary" })
+}

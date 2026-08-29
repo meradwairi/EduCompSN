@@ -1,0 +1,107 @@
+﻿@model IEnumerable<EduCompSN_Clean.Models.PostWithUserViewModel>
+
+@{
+    ViewBag.Title = "نتائج البحث";
+}
+
+<h2>نتائج البحث عن: "@ViewBag.SearchQuery"</h2>
+
+@if (!Model.Any())
+{
+    <p>لا توجد منشورات تطابق بحثك.</p>
+}
+else
+{
+    foreach (var item in Model)
+    {
+        <div class="post-card" style="border:1px solid #ccc; margin-bottom:20px; padding:15px; border-radius:10px;">
+            <div><strong>@item.UserFullName</strong></div>
+            <div style="margin-top:10px;">@item.Post.Content</div>
+            <div style="margin-top:15px;">
+                <button class="like-btn" data-postid="@item.Post.Id" style="margin-left:15px;">
+                    👍 <span class="like-count">@item.LikeCount</span>
+                </button>
+                <button class="chat-post-icon" data-userid="@item.PosterUserId" data-username="@item.UserFullName">
+                    💬
+                </button>
+            </div>
+        </div>
+    }
+}
+
+<!-- نافذة الدردشة المنبثقة (مخفية) -->
+<div id="chatPopup" style="display:none; position:fixed; bottom:20px; right:20px; width:320px; background:#fff; border:1px solid #aaa; border-radius:12px; box-shadow:0 2px 15px rgba(0,0,0,0.3); z-index:10000;">
+    <div style="background:#007bff; color:white; padding:12px; border-radius:12px 12px 0 0;">
+        دردشة فورية
+        <button id="closeChatBtn" style="float:left; background:none; border:none; color:white; font-weight:bold; cursor:pointer;">✖</button>
+        <div style="clear:both"></div>
+    </div>
+    <div id="chatMessagesList" style="height:250px; overflow-y:auto; padding:10px; background:#f9f9f9;"></div>
+    <div style="padding:12px;">
+        <input type="text" id="chatMessageInput" style="width:70%; padding:5px;" placeholder="اكتب رسالتك..." />
+        <button id="sendChatBtn" style="padding:5px 12px;">إرسال</button>
+    </div>
+</div>
+
+@section scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="~/Scripts/jquery.signalR-2.4.3.min.js"></script>
+    <script src="~/signalr/hubs"></script>
+    <script>
+        $(function () {
+            // ----- اللايك -----
+            $('.like-btn').click(function () {
+                var btn = $(this);
+                var postId = btn.data('postid');
+                var likeSpan = btn.find('.like-count');
+                $.ajax({
+                    url: '@Url.Action("ToggleLike", "Home")',
+                    type: 'POST',
+                    data: { postId: postId },
+                    success: function (res) {
+                        if (res.success) likeSpan.text(res.newLikeCount);
+                        else alert(res.message);
+                    },
+                    error: function () { alert("خطأ في الاتصال"); }
+                });
+            });
+
+            // ----- الدردشة -----
+            // إصلاح الخطأ TS1109: استخدام رقم آمن من خلال تحويل القيمة الممررة من Razor
+            var currentUserId = parseInt('@(Session["UserId"] ?? "0")', 10);
+            if (isNaN(currentUserId)) currentUserId = 0;
+
+            if (currentUserId > 0) {
+                $.connection.hub.qs = { "userId": currentUserId.toString() };
+                var chat = $.connection.chatHub;
+
+                chat.client.addNewMessageToPage = function (fromUser, message) {
+                    $('#chatMessagesList').append('<div><strong>' + escapeHtml(fromUser) + ':</strong> ' + escapeHtml(message) + '</div>');
+                    $('#chatMessagesList').scrollTop($('#chatMessagesList')[0].scrollHeight);
+                };
+
+                $.connection.hub.start().done(function () {
+                    $('.chat-post-icon').click(function () {
+                        window.currentChatUserId = $(this).data('userid');
+                        var userName = $(this).data('username');
+                        $('#chatMessagesList').html('<div>تتحدث مع: ' + escapeHtml(userName) + '</div>');
+                        $('#chatPopup').show();
+                        $('#chatMessageInput').focus();
+                    });
+                    $('#closeChatBtn').click(function () { $('#chatPopup').hide(); });
+                    $('#sendChatBtn').click(function () {
+                        var msg = $('#chatMessageInput').val().trim();
+                        if (msg && window.currentChatUserId) {
+                            chat.server.sendPrivateMessage(window.currentChatUserId, msg);
+                            $('#chatMessageInput').val('').focus();
+                        }
+                    });
+                }).fail(function(e) { console.log(e); alert("فشل الاتصال بخادم الدردشة"); });
+            }
+
+            function escapeHtml(str) {
+                return $('<div/>').text(str).html();
+            }
+        });
+    </script>
+}

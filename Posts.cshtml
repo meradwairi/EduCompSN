@@ -1,0 +1,24 @@
+﻿@model IEnumerable<EduCompSN_Clean.Models.Post>
+
+<h2>Manage Posts</h2>
+
+<table class="table table-bordered">
+    <thead><tr><th>Id</th><th>User Id</th><th>Content</th><th>Created At</th><th>Actions</th></tr></thead>
+    <tbody>
+        @foreach (var post in Model)
+        {
+            <tr>
+                <td>@post.Id</td>
+                <td>@post.UserId</td>
+                <td>@post.Content</td>
+                <td>@post.CreatedAt</td>
+                <td>
+                    @using (Html.BeginForm("DeletePost", "Admin", new { id = post.Id }, FormMethod.Post))
+                    {
+                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

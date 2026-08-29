@@ -1,0 +1,133 @@
+﻿@model IEnumerable<EduCompSN_Clean.Models.User>
+
+@{
+    ViewBag.Title = "All Members";
+}
+
+<style>
+    /* نفس التنسيقات المستخدمة في الملف الشخصي والمنشورات */
+    .member-card {
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+        transition: transform 0.2s;
+        height: 100%;
+    }
+
+        .member-card:hover {
+            transform: translateY(-4px);
+        }
+
+    .avatar-circle {
+        width: 70px;
+        height: 70px;
+        background-color: #b19cd9;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 1.8rem;
+        margin-bottom: 1rem;
+    }
+
+    .btn-outline-primary {
+        border-color: #b19cd9;
+        color: #b19cd9;
+        border-radius: 30px;
+        padding: 6px 20px;
+    }
+
+        .btn-outline-primary:hover {
+            background-color: #b19cd9;
+            border-color: #b19cd9;
+            color: white;
+        }
+
+    .badge-role {
+        background-color: #e9ecef;
+        color: #495057;
+        border-radius: 30px;
+        font-weight: 500;
+        padding: 4px 12px;
+    }
+
+    .search-box {
+        border-radius: 50px;
+        border: 1px solid #dee2e6;
+        padding: 10px 20px;
+        width: 100%;
+    }
+
+        .search-box:focus {
+            border-color: #b19cd9;
+            box-shadow: 0 0 0 0.2rem rgba(177,156,217,0.25);
+        }
+
+    .btn-search {
+        background-color: #b19cd9;
+        border: none;
+        border-radius: 50px;
+        padding: 10px 25px;
+        color: white;
+    }
+
+        .btn-search:hover {
+            background-color: #9b7bcb;
+        }
+</style>
+
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="mb-3"><i class="fas fa-users"></i> All Members</h2>
+            @using (Html.BeginForm("Index", "Users", FormMethod.Get))
+            {
+                <div class="row g-2">
+                    <div class="col-md-8 col-lg-9">
+                        <input type="text" name="search" class="form-control search-box" placeholder="Search by name or email..." value="@Request.QueryString["search"]" />
+                    </div>
+                    <div class="col-md-4 col-lg-3">
+                        <button type="submit" class="btn btn-search w-100"><i class="fas fa-search"></i> Search</button>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info text-center">No members found.</div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var user in Model)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="card member-card">
+                        <div class="card-body text-center">
+                            @if (!string.IsNullOrEmpty(user.ProfilePicture))
+                            {
+                                <img src="@user.ProfilePicture" class="rounded-circle img-fluid" style="width: 80px; height: 80px; object-fit: cover;" />
+                            }
+                            else
+                            {
+                                <div class="avatar-circle mx-auto">
+                                    @user.FullName.Substring(0, 1).ToUpper()
+                                </div>
+                            }
+                            <h5 class="card-title mt-2">@user.FullName</h5>
+                            <p class="card-text text-muted small">@user.Email</p>
+                            <span class="badge-role d-inline-block mb-3">@user.Role</span>
+                            <div>
+                                <a href="@Url.Action("Details", "Profile", new { id = user.Id })" class="btn btn-sm btn-outline-primary">View Profile</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
